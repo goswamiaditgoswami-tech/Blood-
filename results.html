@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>result of blood report</title>
+
+<!-- Chart.js for the graph -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+        background: #f5f7fb;
+        color: #222;
+    }
+
+    /* HEADER */
+
+    .header {
+        background: linear-gradient(135deg, #a90000, #e63946);
+        color: white;
+        padding: 25px 7%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header h1 {
+        font-size: 28px;
+    }
+
+    .header p {
+        margin-top: 6px;
+        opacity: 0.9;
+    }
+
+    .dashboard-btn {
+        background: white;
+        color: #b00000;
+        padding: 11px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+
+    /* MAIN */
+
+    .container {
+        width: 90%;
+        max-width: 1150px;
+        margin: 30px auto;
+    }
+
+
+    /* PATIENT CARD */
+
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .title {
+        color: #b00000;
+        margin-bottom: 20px;
+        font-size: 21px;
+    }
+
+    .patient-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+
+    .patient-box {
+        background: #f7f8fb;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .patient-box span {
+        display: block;
+        color: #777;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .patient-box strong {
+        font-size: 16px;
+    }
+
+
+    /* SUMMARY */
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 22px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .summary-card h2 {
+        font-size: 32px;
+        margin-bottom: 5px;
+    }
+
+    .summary-card p {
+        color: #777;
+        font-size: 14px;
+    }
+
+    .total h2 {
+        color: #333;
+    }
+
+    .normal h2 {
+        color: #198754;
+    }
+
+    .low h2 {
+        color: #e0a000;
+    }
+
+    .high h2 {
+        color: #dc3545;
+    }
+
+
+    /* GRAPH */
+
+    .graph-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .chart-container {
+        width: 300px;
+        height: 300px;
+        margin: auto;
+    }
+
+
+    /* OVERALL */
+
+    .overall {
+        background: #fff;
+        border-left: 5px solid #b00000;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .overall h2 {
+        color: #b00000;
+        margin-bottom: 10px;
+    }
+
+    .overall p {
+        color: #555;
+        line-height: 1.6;
+    }
+
+
+    /* TEST RESULT */
+
+    .results-heading {
+        margin: 25px 0 15px;
+        color: #333;
+    }
+
+    .result-card {
+        background: white;
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .result-header h3 {
+        font-size: 18px;
+    }
+
+
+    /* STATUS */
+
+    .status {
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-normal {
+        background: #d1e7dd;
+        color: #146c43;
+    }
+
+    .status-low {
+        background: #fff3cd;
+        color: #997404;
+    }
+
+    .status-high {
+        background: #f8d7da;
+        color: #b02a37;
+    }
+
+
+    /* VALUE GRID */
+
+    .value-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .value-box {
+        background: #f7f8fb;
+        padding: 15px;
+        border-radius: 9px;
+    }
+
+    .value-box span {
+        display: block;
+        color: #777;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .value-box strong {
+        font-size: 16px;
+    }
+
+
+    /* CONCERN */
+
+    .concern {
+        margin-top: 15px;
+        padding: 15px;
+        background: #fafafa;
+        border-radius: 9px;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    .concern strong {
+        color: #b00000;
+    }
+
+
+    /* FINDINGS */
+
+    .finding {
+        background: #f7f8fb;
+        padding: 13px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+
+    /* BUTTONS */
+
+    .buttons {
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .print-btn {
+        border: none;
+        background: #b00000;
+        color: white;
+        padding: 13px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .home-btn {
+        display: inline-block;
+        background: #333;
+        color: white;
+        padding: 13px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+
+    /* DISCLAIMER */
+
+    .disclaimer {
+        background: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 16px;
+        border-radius: 10px;
+        color: #665c32;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 20px;
+    }
+
+
+    /* FOOTER */
+
+    footer {
+        background: #222;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+
+        .patient-grid,
+        .summary-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .value-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    @media (max-width: 500px) {
+
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .patient-grid,
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    /* PRINT */
+
+    @media print {
+
+        .header {
+            background: white;
+            color: black;
+            border-bottom: 2px solid #b00000;
+        }
+
+        .dashboard-btn,
+        .buttons {
+            display: none;
+        }
+
+        body {
+            background: white;
+        }
+
+        .card,
+        .summary-card,
+        .graph-card,
+        .result-card,
+        .overall {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+    }
+
+</style>
+
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<div class="header">
+
+
+<div>
+
+    <h1>Blood Report Analysis</h1>
+
+    <p>
+        Complete Blood Test Report
+    </p>
+
+</div>
+
+<a href="/dashboard" class="dashboard-btn">
+    Dashboard
+</a>
+
+
+</div>
+
+<div class="container">
+
+<!-- PATIENT INFORMATION -->
+
+<div class="card">
+
+    <h2 class="title">
+        Patient Information
+    </h2>
+
+    <div class="patient-grid">
+
+        <div class="patient-box">
+
+            <span>Name</span>
+
+            <strong>
+                {{ data.get("name", "Patient") }}
+            </strong>
+
+        </div>
+
+
+        <div class="patient-box">
+
+            <span>Age</span>
+
+            <strong>
+                {{ data.get("age", "Not Provided") }}
+            </strong>
+
+        </div>
+
+
+        <div class="patient-box">
+
+            <span>Gender</span>
+
+            <strong>
+                {{ data.get("gender", "Not Provided") }}
+            </strong>
+
+        </div>
+
+
+        <div class="patient-box">
+
+            <span>Report Date</span>
+
+            <strong id="date">
+                -
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- SUMMARY -->
+
+<div class="summary-grid">
+
+
+    <div class="summary-card total">
+
+        <h2>
+            {{ summary.total }}
+        </h2>
+
+        <p>
+            Total Tests
+        </p>
+
+    </div>
+
+
+    <div class="summary-card normal">
+
+        <h2>
+            {{ summary.normal }}
+        </h2>
+
+        <p>
+            Normal
+        </p>
+
+    </div>
+
+
+    <div class="summary-card low">
+
+        <h2>
+            {{ summary.low }}
+        </h2>
+
+        <p>
+            Low
+        </p>
+
+    </div>
+
+
+    <div class="summary-card high">
+
+        <h2>
+            {{ summary.high }}
+        </h2>
+
+        <p>
+            High
+        </p>
+
+    </div>
+
+</div>
+
+
+
+<!-- DONUT GRAPH -->
+
+<div class="graph-card">
+
+    <h2 class="title">
+        Report Overview
+    </h2>
+
+    <div class="chart-container">
+
+        <canvas id="statusChart"></canvas>
+
+    </div>
+
+</div>
+
+
+
+<!-- OVERALL SUMMARY -->
+
+<div class="overall">
+
+    <h2>
+        Overall Summary
+    </h2>
+
+    <p>
+        {{ overall_message }}
+    </p>
+
+</div>
+
+
+
+<!-- DETAILED RESULTS -->
+
+<h2 class="results-heading">
+    Detailed Test Results
+</h2>
+
+
+{% for result in results %}
+
+<div class="result-card">
+
+
+    <div class="result-header">
+
+        <h3>
+            {{ result.name }}
+        </h3>
+
+
+        {% if result.status == "NORMAL" %}
+
+            <span class="status status-normal">
+                NORMAL
+            </span>
+
+        {% elif result.status == "LOW" %}
+
+            <span class="status status-low">
+                LOW
+            </span>
+
+        {% else %}
+
+            <span class="status status-high">
+                HIGH
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <div class="value-grid">
+
+
+        <div class="value-box">
+
+            <span>Your Value</span>
+
+            <strong>
+                {{ result.value }} {{ result.unit }}
+            </strong>
+
+        </div>
+
+
+        <div class="value-box">
+
+            <span>Reference Range</span>
+
+            <strong>
+                {{ result.range }}
+            </strong>
+
+        </div>
+
+
+        <div class="value-box">
+
+            <span>Status</span>
+
+            <strong>
+                {{ result.status }}
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="concern">
+
+        <strong>
+            Possible Health Concern:
+        </strong>
+
+        <br>
+
+        {{ result.concern }}
+
+    </div>
+
+
+</div>
+
+{% endfor %}
+
+
+
+<!-- KEY FINDINGS -->
+
+<div class="card">
+
+    <h2 class="title">
+        Key Findings
+    </h2>
+
+
+    {% if summary.high > 0 %}
+
+    <div class="finding">
+
+        🔴
+
+        <strong>
+            {{ summary.high }}
+        </strong>
+
+        parameter(s) are above the reference range.
+
+    </div>
+
+    {% endif %}
+
+
+    {% if summary.low > 0 %}
+
+    <div class="finding">
+
+        🟡
+
+        <strong>
+            {{ summary.low }}
+        </strong>
+
+        parameter(s) are below the reference range.
+
+    </div>
+
+    {% endif %}
+
+
+    {% if summary.normal > 0 %}
+
+    <div class="finding">
+
+        🟢
+
+        <strong>
+            {{ summary.normal }}
+        </strong>
+
+        parameter(s) are within the reference range.
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+
+<!-- DISCLAIMER -->
+
+<div class="disclaimer">
+
+    <strong>Important:</strong>
+
+    This report is an educational screening tool.
+    The LOW, NORMAL and HIGH classifications are based
+    on the reference ranges used by this project.
+
+    An abnormal result does not by itself confirm a disease.
+    Please consult a qualified healthcare professional
+    for proper interpretation and diagnosis.
+
+</div>
+
+
+
+<!-- BUTTONS -->
+
+<div class="buttons">
+
+    <button
+        class="print-btn"
+        onclick="window.print()">
+
+        🖨 Print Report
+
+    </button>
+
+
+    <a
+        href="/dashboard"
+        class="home-btn">
+
+        Back to Dashboard
+
+    </a>
+
+</div>
+
+
+</div>
+
+<footer>
+
+
+© 2026 Blood Report Analysis System
+
+
+</footer>
+
+<script>
+
+    // Report date
+
+    const today = new Date();
+
+    document.getElementById("date").innerText =
+        today.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+
+
+    // Donut Chart
+
+    const normal = {{ summary.normal }};
+    const low = {{ summary.low }};
+    const high = {{ summary.high }};
+
+
+    new Chart(
+        document.getElementById("statusChart"),
+        {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: [
+                    "Normal",
+                    "Low",
+                    "High"
+                ],
+
+                datasets: [{
+
+                    data: [
+                        normal,
+                        low,
+                        high
+                    ]
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        position: "bottom"
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+
+</html>
